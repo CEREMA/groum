@@ -1,0 +1,27 @@
+{
+    "id": "528A290A",
+    "path": "C:/Users/mathieu.rajerison/Desktop/TAFF_MAISON/GIT/groum/notebooks/tooling.Rmd",
+    "project_path": "notebooks/tooling.Rmd",
+    "type": "r_markdown",
+    "hash": "2473574248",
+    "contents": "",
+    "dirty": false,
+    "created": 1645517316697.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "chunk_output_type": "inline",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "73,0",
+        "scrollLine": "64"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1645521681,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1645521681825,
+    "read_only": false,
+    "read_only_alternatives": []
+}

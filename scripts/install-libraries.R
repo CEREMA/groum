@@ -1,0 +1,10 @@
+install.packages("optparse", 
+                 "tidyverse", 
+                 "sf", 
+                 "geojsonsf", 
+                 "stringdist", 
+                 "glue", 
+                 "jsonlite", 
+                 "stringi",
+                 "lubridate",
+                 "shiny")

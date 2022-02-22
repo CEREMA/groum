@@ -1,0 +1,100 @@
+---
+title: "Tooling"
+output: html_notebook
+---
+
+Ce notebook vise à créer les scripts :
+
+- de géocodage de CSV
+- de création de données spatiales
+- de création de l'arrêté HTML
+
+```{r message = FALSE, warning = FALSE}
+library(tidyverse)
+library(sf)
+library(geojsonsf)
+library(stringdist)
+library(glue)
+library(jsonlite)
+library(stringi)
+library(lubridate)
+library(shiny)
+```
+
+
+```{r message = FALSE, warning = FALSE}
+source("../helpers/imports/main.R")
+source("../helpers/imports/markdown.R")
+source("../helpers/imports/opening-hours.R")
+source("../helpers/imports/geocode.R")
+```
+
+# Géocodage de rue
+```{r}
+source("../helpers/main.R")
+
+geocodeStreet(street      = "Chemain du Plan d'Ollive", 
+              streetsFile = "../data/13022-Cassis.geojson")
+
+geocodeStreet(street      = "Chemain du Plan d'Ollive, Charles de Gaulle", 
+              streetsFile = "../data/13022-Cassis.geojson")
+```
+
+# Géocodage de fichiers
+
+Géocodage depuis un fichier GeoJSON distant :
+```{r}
+source("../helpers/imports/geocode.R")
+
+inputCSV <- "../../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv"
+file.exists(inputCSV)
+
+# streets <- "https://raw.githubusercontent.com/mrajerisonCerema/streets-as-geojson/master/OSM/PROVENCE%20ALPES%20COTE%20D%20AZUR/13022-Cassis.geojson"
+streets <- "../data/13022-Cassis.geojson"
+file.exists(streets)
+
+geocodeCSV(input   = inputCSV,
+           streets = streets,
+           output  = "../outputs/arrete-cassis2.csv")
+```
+
+Contrôle de la donnée :
+```{r}
+read.csv("../outputs/arrete-cassis2.csv", sep=",", encoding = "UTF-8") %>% names
+```
+
+# Conversion en intégrant la commune
+A FAIRE
+
+# Conversion du fichier en Markdown
+```{r}
+source("../helpers/imports/markdown.R")
+source("../helpers/imports/opening-hours.R")
+
+CSV2MD(input  = inputCSV, 
+       output = "../outputs/arrete-cassis.md")
+```
+
+# Conversion du fichier en HTML
+```{r}
+source("../helpers/imports/markdown.R")
+source("../helpers/imports/opening-hours.R")
+
+CSV2HTML(input = inputCSV, output = "../outputs/cassis.html")
+```
+
+# Export des données en GPKG
+
+Export des données complètes sans séparation selon le type de véhicule
+```{r}
+source("../helpers/imports/geocode.R", encoding = "UTF-8")
+
+input  <- "../outputs/arrete-cassis2.csv" # CSV géocodé
+file.exists(input)
+
+CSV2GPKG(input   = input,
+         output  = "../outputs/arrete-cassis.gpkg",
+         geom_col = "X_GEOM_WKT")
+```
+
+# Export des cartes
