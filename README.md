@@ -10,7 +10,7 @@ Outil en ligne de commande pour exploiter les données d'arrêtés
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive" --streets="data/13022-Cassis.geojson"
 
-> Ici, on recherche la 'Chemain du Plan d'Ollive' (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
+> Ici, on recherche 'Chemain du Plan d'Ollive' (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
 
 Voici le résultat :
 
