@@ -3,4 +3,4 @@
 - [ ] Enlever message Conversion automatique de LHS en liste
 - [ ] overwrite ou pas
 - [ ] Mettre les fonctions dans helpers/main.R
-- [ ] Vérifier que geom_col rempli avant de convertir en GPKG
+- [x] Vérifier que geom_col rempli avant de convertir en GPKG

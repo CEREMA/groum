@@ -32,11 +32,18 @@ source("../helpers/imports/geocode.R")
 # Géocodage de rue
 ```{r}
 source("../helpers/main.R")
+source("../helpers/imports/geocode.R")
 
-geocodeStreet(street      = "Chemain du Plan d'Ollive", 
+geocodeStreet(street      = "Chem. du plan d'Ollive", 
               streetsFile = "../data/13022-Cassis.geojson")
+```
 
-geocodeStreet(street      = "Chemain du Plan d'Ollive, Charles de Gaulle", 
+Recherche de plusieurs rues
+```{r}
+source("../helpers/main.R")
+source("../helpers/imports/geocode.R")
+
+geocodeStreet(street      = "Chem. du plan d'Ollive, esplanade Charles de Gaulle", 
               streetsFile = "../data/13022-Cassis.geojson")
 ```
 

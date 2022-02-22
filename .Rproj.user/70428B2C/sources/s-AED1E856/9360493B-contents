@@ -49,7 +49,6 @@ groum <- function(args) {
 
   args      <- parse_args(parser, args = args)
   extension <- gsub("^.*\\.(.*)$", "\\1", args$output)
-  print(extension)
   
   if(length(extension) == 0) {
     # "Chemain du Plan d'Ollive,Charles de Gaulle"

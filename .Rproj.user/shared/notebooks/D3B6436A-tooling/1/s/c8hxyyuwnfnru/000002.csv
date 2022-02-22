@@ -1,0 +1,47 @@
+"0","source(""../helpers/main.R"")"
+"0","source(""../helpers/imports/geocode.R"")"
+"0",""
+"0","geocodeStreet(street      = ""Chem. du plan d'Ollive, esplanade Charles de Gaulle"", "
+"0","              streetsFile = ""../data/13022-Cassis.geojson"")"
+"2","Nous recherchons la géométrie de la rue dénommée 'Chem. du plan d'Ollive'...
+"
+"2","
+"
+"2","La rue dont le nom est le plus proche est 'Chemin du Plan d'Olive'
+"
+"2","Vous pouvez copier 'Chemin du Plan d'Olive' dans la colonne EMPRISE_DESIGNATION.
+"
+"2","
+"
+"2","Voici la géométrie de la rue 'Chemin du Plan d'Olive' :
+"
+"2","---
+"
+"2","MULTILINESTRING ((5.543605 43.23167, 5.545231 43.23162, 5.545767 43.23168, 5.546974 43.23272, 5.547173 43.23286, 5.547382 43.2329, 5.547532 43.23299, 5.547688 43.23323, 5.54845 43.23389, 5.548771 43.23435, 5.549115 43.23456, 5.549528 43.23515, 5.549834 43.23543, 5.550314 43.23602, 5.550661 43.2361, 5.550825 43.2361, 5.551007 43.23602, 5.551145 43.23583, 5.551188 43.23537, 5.551218 43.23524, 5.551272 43.23515, 5.551329 43.23509, 5.551435 43.23503, 5.551576 43.23499, 5.551698 43.23496, 5.552037 43.23507), (5.552212 43.23515, 5.552325 43.23521, 5.552417 43.23527, 5.552478 43.23533, 5.552517 43.2354, 5.552532 43.23547, 5.552531 43.23552, 5.552512 43.23559, 5.552466 43.23565, 5.552429 43.2357, 5.552326 43.23575, 5.552033 43.23588, 5.551829 43.23599, 5.551729 43.23605, 5.551634 43.23614, 5.551573 43.23623, 5.55154 43.23633, 5.551541 43.23644, 5.551595 43.2365, 5.551698 43.23656, 5.551848 43.23665, 5.55202 43.23674))
+"
+"2","---
+"
+"2","Vous pouvez copier cette valeur dans la colonne GEOM_WKT de votre fichier
+"
+"2","===
+"
+"2","Nous recherchons la géométrie de la rue dénommée 'esplanade Charles de Gaulle'...
+"
+"2","
+"
+"2","La rue dont le nom est le plus proche est 'Esplanade G�n�ral de Gaulle'
+"
+"2","Vous pouvez copier 'Esplanade G�n�ral de Gaulle' dans la colonne EMPRISE_DESIGNATION.
+"
+"2","
+"
+"2","Voici la géométrie de la rue 'Esplanade G�n�ral de Gaulle' :
+"
+"2","---
+"
+"2","LINESTRING (5.537346 43.21343, 5.537423 43.21343, 5.537521 43.21342, 5.53771 43.21337, 5.537784 43.21344, 5.537835 43.21347, 5.53792 43.21351, 5.538419 43.21334, 5.538593 43.21332)
+"
+"2","---
+"
+"2","Vous pouvez copier cette valeur dans la colonne GEOM_WKT de votre fichier
+"

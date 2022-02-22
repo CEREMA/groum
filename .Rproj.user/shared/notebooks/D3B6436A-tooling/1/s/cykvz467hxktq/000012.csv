@@ -14,13 +14,9 @@
 "1","
 "
 "0","geocodeCSV(input   = inputCSV,"
-"0","           streets     = streets,"
+"0","           streets = streets,"
 "0","           output  = ""../outputs/arrete-cassis2.csv"")"
 "2",">> read_streets (lecture des rues) ../data/13022-Cassis.geojson
 "
 "2",">> Recherche des rues dont les noms sont les plus proches...
-"
-"2",">> Le fichier communes n'a pas été spécifié. Nous ne rajouterons donc pas la géométrie de la commune.
-"
-"2",">> Export de ../outputs/arrete-cassis2.csv
 "

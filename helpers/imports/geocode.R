@@ -65,7 +65,7 @@ geocodeCSV <- function(input, streets, output, communes = NA) {
 
 # Mode = "distance" (lenvenshtein) ou "inclusion"
 get_rues <- function(sf_rues, rues, mode = "distance", communes = NA) {
-  message(">> Recherche des rues dont les noms sont les plus proches...")
+  # message(">> Recherche des rues dont les noms sont les plus proches...")
   
   out <- vector(mode="list")
   for(i in 1:length(rues)) {
@@ -223,7 +223,7 @@ read_json <- function(url) {
 }
 
 read_streets <- function(inputFile) {
-  message(">> read_streets (lecture des rues) ", inputFile)
+  # message(">> read_streets (lecture des rues) ", inputFile)
   extension <- gsub(".*\\.(.*)", "\\1", inputFile)
   
   if(extension %in% c("json", "geojson")) {
