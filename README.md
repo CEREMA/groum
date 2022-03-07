@@ -17,7 +17,7 @@ Il s'agit d'utilitaires associés au schéma [http://schema.data.gouv.fr/CEREMA/
 
 ## Géocoder
 ### Trouver une rue
-On recherche `'Chemain du Plan d'Ollive'` (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
+Dans l'exemple ci-dessous, on recherche `'Chemain du Plan d'Ollive'` (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive" --streets="data/13022-Cassis.geojson"
 
@@ -33,55 +33,61 @@ Voici le résultat dans l'invite de commandes :
 ![](files/geocode-single.png)
 
 ### Pour plusieurs rues
-Trouve Chemain du Plan d'Ollive,esplanade Charle de Gaule dans le fichier 13022-Cassis.geojson
+Ci-dessous, on recherche : 
+
+- `'Chemain du Plan d'Ollive'`
+- `'esplanade Charle de Gaule'`
+
+dans le fichier `13022-Cassis.geojson`
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive,esplanade Charle de Gaule" --streets="data/13022-Cassis.geojson"
 
 ### Trouver une commune
-Trouve la géométrie de la commune de Cassis
+Ci-dessous, on recherche la géométrie de la commune de Cassis
 
 	%R_BIN%\Rscript.exe groum.R --input="Commune de Cassis"
 
-> Pas besoin d'indiquer le fichier geojson car l'API geo.api.gouv.fr est utilisée pour ce faire
+> Pas besoin d'indiquer le fichier geojson car l'API geo.api.gouv.fr est utilisée
 
 ### Trouver un POI
 En cours d'écriture...
 
 ## Conversions
 ### Du CSV au GeoCSV
-
-Cette fonction crée une version GeoCSV du fichier en ajoutant des colonnes géométriques au fichier initial
+Ci-dessous, on crée une version GeoCSV du fichier en ajoutant des colonnes géométriques au fichier initial
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis-geo.csv" --streets="data/13022-Cassis.geojson"
 
 ![](files/geocode.png)
 
-> Dans l'exemple ci-dessus, certaines rues ont mal été trouvées dans le fichier d'origine. Cela peut être dû à leur absence dans le fichier GeoJSON d'origine, ou à une écriture très différente.
-
-#### Sortie
 Le fichier `arrete-cassis-geo.csv` contiendra des colonnes supplémentaires dont `X_EMPRISE_DESIGNATION` avec le nom de la rue le plus similaire qui a été trouvé et `X_GEOM_WKT` avec la géométrie de la rue au format WKT.
 
+> Dans l'exemple ci-dessus, certaines rues ont mal été trouvées dans le fichier d'origine. Cela peut être dû à leur absence dans le fichier de référence, ou à une écriture assez éloignée.
+
 ### Du CSV à l'arrêté HTML
-Cette fonction génère l'arrêté depuis les données, sous une forme lisible au format HTML, et ainsi de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
+Ci-dessous, on génère l'arrêté depuis les données, sous une forme lisible au format HTML, et ainsi de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.html"
 
 ![](files/html.png)
 
-> La fonction de génération d'arrêté est encore à l'état expérimental
+> La fonction de génération d'arrêté est encore à l'état expérimental. N'hésitez pas à [nous signaler des soucis](https://github.com/CEREMA/groum/issues).
 
 ### Du GeoCSV au fichier GPKG
-Cette fonction crée le fichier spatial depuis le fichier de données d'arrêtés de manière à pouvoir l'afficher dans un logiciel type QGIS
+Ci-dessous, on crée un fichier spatial depuis le fichier de données d'arrêtés de manière à pouvoir l'afficher dans un logiciel comme QGIS
 
 	%R_BIN%\Rscript.exe groum.R --input="outputs/arrete-cassis-geo.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
+
+Voici ce que donne l'ouverture du fichier sous QGIS :
 
 ![](files/spatial.png)
 
 ## Du CSV à l'arrêté en Markdown
-Générer l'arrêté depuis les données, au format Markdown
+Ci-dessous, on génère l'arrêté au format Markdown
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.md"
 
 ## Licence
-[Licence Affero](LICENSE)  
-Auteur : Cerema > Mathieu Rajerison
+- groum a été créé en Mars 2022
+- Licence : [Licence Affero](LICENSE)  
+- Auteur : Cerema > Mathieu Rajerison
