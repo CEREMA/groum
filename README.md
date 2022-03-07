@@ -65,7 +65,7 @@ Le fichier `arrete-cassis-geo.csv` contiendra des colonnes supplémentaires dont
 > Dans l'exemple ci-dessus, certaines rues ont mal été trouvées dans le fichier d'origine. Cela peut être dû à leur absence dans le fichier de référence, ou à une écriture assez éloignée.
 
 ### Du CSV à l'arrêté HTML
-Ci-dessous, on génère l'arrêté depuis les données, sous une forme lisible au format HTML, et ainsi de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
+Ci-dessous, on génère l'arrêté depuis les données, sous une forme lisible au format HTML, ce qui permet de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.html"
 
