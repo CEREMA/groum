@@ -1,46 +1,37 @@
-arretePath <- "../../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv"
-schemaPath <- "../../schema-arrete-circulation-marchandises/schema.json"
-streetsPath <- "../data/13022-Cassis.geojson"
-
-# groomy
-importsDir <- file.path("../../groumy/shinyapp", "helpers", "imports")
-schemaDir  <- file.path("../../groumy/shinyapp", "www")
-dataDir    <- file.path("../../groumy/shinyapp", "www")
-
-# groum
-importsDir <- file.path("../../groum/", "helpers", "imports")
-schemaDir  <- file.path("../../groum/", "data")
-dataDir    <- file.path("../../groum/", "data")
+setwd("C:/Users/mathieu.rajerison/Desktop/TAFF_MAISON/GIT/groum")
 
 # Copie des fonctions
-dir.create(importsDir)
-file.copy("shinyapp/helpers/main.R", 
-          file.path(importsDir, "main.R"),
+file.copy("../groum-groum/src/shinyapp/libraries.R", 
+          file.path("helpers/imports", "libraries.R"),
           overwrite = T)
 
-file.copy("shinyapp/helpers/markdown.R",
-          file.path(importsDir, "markdown.R"),
+file.copy("../groum-groum/src/shinyapp/helpers/main.R", 
+          file.path("helpers/imports", "main.R"),
           overwrite = T)
 
-file.copy("shinyapp/helpers/opening-hours.R",
-          file.path(importsDir, "opening-hours.R"),
+file.copy("../groum-groum/src/shinyapp/helpers/markdown.R",
+          file.path("helpers/imports", "markdown.R"),
           overwrite = T)
 
-file.copy("shinyapp/helpers/geocode.R",
-          file.path(importsDir, "geocode.R"),
+file.copy("../groum-groum/src/shinyapp/helpers/opening-hours.R",
+          file.path("helpers/imports", "opening-hours.R"),
+          overwrite = T)
+
+file.copy("../groum-groum/src/shinyapp/helpers/geocode.R",
+          file.path("helpers/imports", "geocode.R"),
           overwrite = T)
 
 # Copie du schéma
-file.copy(schemaPath,
-          file.path(schemaDir, "schema.json"),
+file.copy("../schema-arrete-circulation-marchandises/schema.json",
+          file.path("data", "schema.json"),
           overwrite = T)
 
 # Copie des données
-file.copy(arretePath,
-          file.path(dataDir, "arrete-cassis.csv"),
+file.copy("../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv",
+          file.path("data", "arrete-cassis.csv"),
           overwrite = T)
 
 # Copie du JSON de rues
-file.copy(streetsPath,
-          file.path(dataDir, "13022-Cassis.geojson"),
+file.copy("../schema-arrete-circulation-marchandises-private/Cassis/13022-Cassis.geojson",
+          file.path("data", "13022-Cassis.geojson"),
           overwrite = T)

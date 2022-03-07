@@ -2,34 +2,6 @@ read_arrete <- function(inputFile) {
   read.csv(inputFile, sep=",", header = TRUE, encoding = "UTF-8")
 }
 
-export_gpkg_by_vehicles <- function(f, outputDir) {
-  
-  f$file_name <- f %>% format_vehicule %>% pull(VEHICULE) %>% {gsub(" ", "-", .)} %>% {glue("{.}.gpkg")}
-  file_names <- unique(f$file_name)
-  
-  for(elt in file_names) {
-    f.sel <- f %>% filter(file_name == elt)
-    export_gpkg(f.sel, file.path(outputDir, elt))
-  }
-}
-
-export_gpkg <- function(f, outputFile) {
-  
-  if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
-    message(">> Export de ", outputFile)
-    st_write(f, outputFile, delete_dsn = TRUE)
-  } else {
-    outputLinePath <- gsub(".gpkg$", "-lines.gpkg", outputFile)
-    message(">> Export de ", outputLinePath)
-    f.lines <- f[grep("LINESTRING", st_geometry_type(f)), ]
-    st_write(f.lines, outputLinePath, delete_dsn = TRUE)
-    
-    outputPolygonPath <- gsub(".gpkg$", "-polygons.gpkg", outputFile)
-    message(">> Export de ", outputPolygonPath)
-    f.polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
-    st_write(f.polygons, outputPolygonPath, delete_dsn = TRUE)
-  }
-}
 
 na_empty <- function(df) {
   df[is.na(df)] <- ''
@@ -51,24 +23,17 @@ get_insee_from_libelle <- function(libelle, comms) {
   if(grepl("^.*([013-9]\\d|2[AB1-9])\\d{3}.*$", libelle)) {
     code_insee <- gsub("^.*((?:[013-9]\\d|2[AB1-9])\\d{3}).*$", "\\1", libelle)
   } else if(grepl("^Commune.*|^commune.*", libelle)) {
+    # Commune de ...
     nom_comm <- gsub("(?:C|c)ommune\\s(?:d'|d’|de\\s)?(.*)", "\\1", libelle)
     code_insee <- get_code_insee_from_nom(nom_comm, comms)
   } else if(grepl("^Ville.*|^ville.*", libelle)) {
+    # Ville de ...
     nom_comm <- gsub("^(?:V|v)ille\\s?(?:d'|d’|de)?(.*)$", "\\1", libelle)
     code_insee <- get_code_insee_from_nom(nom_comm, comms)
   } else {
     return()
   }
   code_insee
-}
-
-get_wkt_from_insee <- function(code_insee, comms) {
-  url <- glue("https://geo.api.gouv.fr/communes/{code_insee}?format=geojson&geometry=contour&fields=geometry")
-  coords <- fromJSON(url)$geometry$coordinates[1,,]
-  geometry <- st_polygon(list(coords)) %>% st_sfc %>% st_set_crs(4326)
-  wkt <- geometry %>% st_as_text()
-  
-  list(code_insee = code_insee, wkt = wkt, geometry = geometry)
 }
 
 get_slc_field_values <- function(the_field) {
@@ -350,7 +315,7 @@ get_url <- function(catalogue, the_code_insee, the_producteur = "OSM") {
   url <- catalogue %>% 
     filter(code_insee == the_code_insee & producteur == the_producteur) %>% 
     pull(url)
-  message(">> URL : ", url)
+  # message(">> URL : ", url)
   url
 }
 
@@ -474,60 +439,6 @@ detectBestString <- function(str, libelles) {
   
   # MIN DISTANCE
   res = df[which.min(df$d), ]
-  
-  return(res)
-}
-
-# Méthode permettant de trouver les rues qui contiennent 
-# un des éléments compris dans une chaîne de caractères
-# Par exemple, "Philippe Solari" va être trouvé dans "Avenue Philippe Solari" 
-# avec un score de 2 puisque Philippe et Solari sont tous deux trouvés
-# (Avenue est supprimé de la recherche)
-# "Rue Philippe Rollin" aura un score de 1
-# Ainsi, si n_result est égal à 1, le score le plus haut sera retourné
-# et "Avenue Philippe Solari" constituera la réponse
-find_streets_containing <- function(sf_rues, rue, n_result) {
-  message(">> Mode : find streets containing")
-  sf_rues_names <- unique(sf_rues$name)
-  clean1 <- clean_street_names(rue)
-  clean2 <- clean_street_names(sf_rues_names)
-  split1 <- strsplit(clean1, " ")[[1]]
-  split2 <- strsplit(clean2, " ")
-  
-  out <- vector(mode = "list")
-  i <- 1
-  j <- 1
-  for(elt1 in split1) {
-    message(">", elt1)
-    for(j in 1:length(split2)) {
-      
-      elt2 <- split2[[j]]
-      
-      elt2 <- setdiff(elt2, c("de", "du", "des", "d'"))
-      elt2 <- setdiff(elt2, c("la", "le", "les"))
-      elt2 <- setdiff(elt2, c("et", "en"))
-      
-      for(elt3 in elt2) {
-        if(elt1 == elt3) {
-          destination <- paste(elt2, collapse = " ")
-          out[[i]] <- data.frame(element = elt1, index = j)
-          i <- i + 1
-        }
-      }
-    }
-  }
-  
-  if(length(out) == 0) return()
-  
-  res <- do.call(rbind, out) %>% 
-    group_by(index) %>% 
-    summarize(note = n(), elements = paste(element, collapse=", ")) %>% 
-    data.frame %>% 
-    ungroup %>% 
-    arrange(desc(note)) %>% 
-    head(n_result) %>% 
-    mutate(source = rue) %>% 
-    mutate(name = sf_rues_names[.$index])
   
   return(res)
 }

@@ -23,35 +23,54 @@ library(shiny)
 
 
 ```{r message = FALSE, warning = FALSE}
-source("../helpers/imports/main.R")
-source("../helpers/imports/markdown.R")
-source("../helpers/imports/opening-hours.R")
-source("../helpers/imports/geocode.R")
+source("../../groum-groum/src/shinyapp/helpers/main.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/markdown.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/opening-hours.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/libraries.R", encoding="UTF-8")
 ```
 
 # Géocodage de rue
 ```{r}
 source("../helpers/main.R")
-source("../helpers/imports/geocode.R")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
-geocodeStreet(street      = "Chem. du plan d'Ollive", 
-              streetsFile = "../data/13022-Cassis.geojson")
+geocode_street(street      = "Chem. du plan d'Ollive",
+               streetsFile = "../data/13022-Cassis.geojson")
 ```
 
 Recherche de plusieurs rues
 ```{r}
 source("../helpers/main.R")
-source("../helpers/imports/geocode.R")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
-geocodeStreet(street      = "Chem. du plan d'Ollive, esplanade Charles de Gaulle", 
+geocode_street(street      = "Chem. du plan d'Ollive, esplanade Charles de Gaule", 
               streetsFile = "../data/13022-Cassis.geojson")
 ```
 
-# Géocodage de fichiers
+# Recherche de commune
+```{r}
+source("../helpers/main.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
+
+geocode_street(street = "commune de Cassis")
+```
+
+
+# Recherche de rue et de commune
+```{r}
+source("../helpers/main.R")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
+
+geocode_street(street     = "Chem. du plan d'Ollive, commune de Cassis", 
+              streetsFile = "../data/13022-Cassis.geojson")
+```
+
+# Géocodage de CSV
 
 Géocodage depuis un fichier GeoJSON distant :
 ```{r}
-source("../helpers/imports/geocode.R")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
 inputCSV <- "../../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv"
 file.exists(inputCSV)
@@ -60,9 +79,9 @@ file.exists(inputCSV)
 streets <- "../data/13022-Cassis.geojson"
 file.exists(streets)
 
-geocodeCSV(input   = inputCSV,
-           streets = streets,
-           output  = "../outputs/arrete-cassis2.csv")
+geocode_CSV(inputCSV  = inputCSV,
+            streets   = streets,
+            outputCSV = "../outputs/arrete-cassis2.csv")
 ```
 
 Contrôle de la donnée :
@@ -75,17 +94,28 @@ A FAIRE
 
 # Conversion du fichier en Markdown
 ```{r}
-source("../helpers/imports/markdown.R")
-source("../helpers/imports/opening-hours.R")
+source("../../groum-groum/src/shinyapp/helpers/markdown.R", encoding = "UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/opening-hours.R", encoding = "UTF-8")
 
 CSV2MD(input  = inputCSV, 
-       output = "../outputs/arrete-cassis.md")
+       output = "../outputs/cassis.md")
 ```
 
 # Conversion du fichier en HTML
 ```{r}
-source("../helpers/imports/markdown.R")
-source("../helpers/imports/opening-hours.R")
+source("../../groum-groum/src/shinyapp/helpers/markdown.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/opening-hours.R", encoding="UTF-8")
+
+inputCSV  <- "../data/arrete-cassis.csv" # CSV géocodé
+f <- read_arrete(inputCSV)
+html <- f %>% renderArreteOfficial()
+writeLines(html, "../outputs/test.html")
+```
+
+
+```{r}
+source("../../groum-groum/src/shinyapp/helpers/markdown.R", encoding="UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/opening-hours.R", encoding="UTF-8")
 
 CSV2HTML(input = inputCSV, output = "../outputs/cassis.html")
 ```
@@ -94,14 +124,14 @@ CSV2HTML(input = inputCSV, output = "../outputs/cassis.html")
 
 Export des données complètes sans séparation selon le type de véhicule
 ```{r}
-source("../helpers/imports/geocode.R", encoding = "UTF-8")
+source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
-input  <- "../outputs/arrete-cassis2.csv" # CSV géocodé
-file.exists(input)
+inputCSV  <- "../outputs/arrete-cassis-geo.csv" # CSV géocodé
+file.exists(inputCSV)
 
-CSV2GPKG(input   = input,
-         output  = "../outputs/arrete-cassis.gpkg",
-         geom_col = "X_GEOM_WKT")
+CSV2GPKG(inputCSV   = inputCSV,
+         outputGPKG = "../outputs/cassis.gpkg",
+         geomCol    = "X_GEOM_WKT")
 ```
 
 # Export des cartes

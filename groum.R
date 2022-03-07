@@ -52,30 +52,29 @@ groum <- function(args) {
   
   if(length(extension) == 0) {
     # "Chemain du Plan d'Ollive,Charles de Gaulle"
-    geocodeStreet(street      = args$input,
-                  streetsFile = args$streets)
+    geocode_street(street      = args$input,
+                   streetsFile = args$streets)
   } else if(extension == "csv") {
 
-    geocodeCSV(input   = args$input,
-               streets = args$streets,
-               output  = args$output)
+    geocode_CSV(inputCSV = args$input,
+               streets   = args$streets,
+               output    = args$output)
 
   } else if(extension == "md") {
 
-    CSV2MD(input  = args$input,
-           output = args$output)
+    CSV2MD(inputCSV = args$input,
+           outputMD = args$output)
 
   } else if(extension == "html") {
 
-    CSV2HTML(input = args$input,
-             output = args$output)
+    CSV2HTML(inputCSV   = args$input,
+             outputHTML = args$output)
 
   } else if(extension == "gpkg") {
 
-    CSV2GPKG(input    = args$input,
-             output   = args$output,
-             geom = "X_GEOM_WKT")
-
+    CSV2GPKG(inputCSV   = args$input,
+             outputGPKG = args$output,
+             geomCol    = "X_GEOM_WKT")
   }
 }
 

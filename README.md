@@ -1,16 +1,25 @@
 # groum
 
-Outil en ligne de commande pour exploiter les données d'arrêtés
+Outil en ligne de commande pour exploiter les données d'arrêtés de circulation permanents pour le transport de marchandises.
+
+Il s'agit d'utilitaires associés au schéma [http://schema.data.gouv.fr/CEREMA/schema-arrete-circulation-marchandises/](http://schema.data.gouv.fr/CEREMA/schema-arrete-circulation-marchandises/)
+
+`groum` permet de :
+
+- Trouver la géométrie de rues ;
+- Trouver la géométrie de communes ;
+- Géocoder un fichier d'arrêtés, à savoir trouver la géométrie des rues qui le composent ;
+- Convertir un fichier d'arrêtés CSV en HTML ;
+- Convertir un fichier d'arrêtés CSV en Markdown
 
 ## Installation
 [Installer et configurer `groum`](INSTALL.md)
 
-
-## Trouver une rue au format WKT
+## Géocoder
+### Trouver une rue
+On recherche `'Chemain du Plan d'Ollive'` (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive" --streets="data/13022-Cassis.geojson"
-
-> Ici, on recherche 'Chemain du Plan d'Ollive' (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
 
 Voici le résultat :
 
@@ -19,31 +28,59 @@ Voici le résultat :
 
 Copier la chaîne commençant par `MULTILINESTRING` dans la colonne `GEOM_WKT`
 
+Voici le résultat dans l'invite de commandes :
+
+![](files/geocode-single.png)
+
 ### Pour plusieurs rues
+Trouve Chemain du Plan d'Ollive,esplanade Charle de Gaule dans le fichier 13022-Cassis.geojson
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive,esplanade Charle de Gaule" --streets="data/13022-Cassis.geojson"
 
-## GeoCSV
-Géocoder un fichier CSV contenant des rues
+### Trouver une commune
+Trouve la géométrie de la commune de Cassis
+
+	%R_BIN%\Rscript.exe groum.R --input="Commune de Cassis"
+
+> Pas besoin d'indiquer le fichier geojson car l'API geo.api.gouv.fr est utilisée pour ce faire
+
+### Trouver un POI
+En cours d'écriture...
+
+## Conversions
+### Du CSV au GeoCSV
+
+Cette fonction crée une version GeoCSV du fichier en ajoutant des colonnes géométriques au fichier initial
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis-geo.csv" --streets="data/13022-Cassis.geojson"
 
+![](files/geocode.png)
+
+> Dans l'exemple ci-dessus, certaines rues ont mal été trouvées dans le fichier d'origine. Cela peut être dû à leur absence dans le fichier GeoJSON d'origine, ou à une écriture très différente.
+
+#### Sortie
 Le fichier `arrete-cassis-geo.csv` contiendra des colonnes supplémentaires dont `X_EMPRISE_DESIGNATION` avec le nom de la rue le plus similaire qui a été trouvé et `X_GEOM_WKT` avec la géométrie de la rue au format WKT.
 
-## Arrêté HTML
-Générer l'arrêté depuis les données, au format HTML
+### Du CSV à l'arrêté HTML
+Cette fonction génère l'arrêté depuis les données, sous une forme lisible au format HTML, et ainsi de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.html"
 
-## Fichier GPKG
-Créer le fichier spatial depuis le fichier de données d'arrêtés
+![](files/html.png)
 
-	%R_BIN%\Rscript.exe --input="outputs/arrete-cassis2.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
+> La fonction de génération d'arrêté est encore à l'état expérimental
 
-## Markdown
+### Du GeoCSV au fichier GPKG
+Cette fonction crée le fichier spatial depuis le fichier de données d'arrêtés de manière à pouvoir l'afficher dans un logiciel type QGIS
+
+	%R_BIN%\Rscript.exe groum.R --input="outputs/arrete-cassis-geo.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
+
+![](files/spatial.png)
+
+## Du CSV à l'arrêté en Markdown
 Générer l'arrêté depuis les données, au format Markdown
 
-	%R_BIN%\Rscript.exe --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.md"
+	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.md"
 
 ## Licence
 [Licence Affero](LICENSE)  

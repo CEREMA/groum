@@ -1,8 +1,12 @@
-"0","source(""../helpers/imports/markdown.R"")"
-"0","source(""../helpers/imports/opening-hours.R"")"
+"0","source(""../../groum-groum/src/shinyapp/helpers/markdown.R"", encoding = ""UTF-8"")"
+"0","source(""../../groum-groum/src/shinyapp/helpers/opening-hours.R"", encoding = ""UTF-8"")"
 "0",""
 "0","CSV2MD(input  = inputCSV, "
-"0","       output = ""../outputs/arrete-cassis.md"")"
+"0","       output = ""../outputs/cassis.md"")"
+"2",">> Lecture de ../data/arrete-cassis.csv
+"
+"2",">> Rendu en cours...
+"
 "2","Conversion automatique de LHS en liste"
 "2","Conversion automatique de LHS en liste"
 "2","Conversion automatique de LHS en liste"
@@ -81,3 +85,5 @@
 "2","Conversion automatique de LHS en liste"
 "2","Conversion automatique de LHS en liste"
 "2","Conversion automatique de LHS en liste"
+"2",">> Export de ../outputs/cassis.md
+"

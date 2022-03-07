@@ -83,38 +83,38 @@ get_titre_arrete <- function(f) {
   titre_arrete
 }
 
-CSV2MD <- function(input, output) {
-  if(!file.exists(input)) {
-    stop(input, " n'existe pas")
+CSV2MD <- function(inputCSV, outputMD) {
+  if(!file.exists(inputCSV)) {
+    stop(inputCSV, " n'existe pas")
   }
   
-  if(!dir.exists(dirname(output))) {
-    stop(dirname(output), " n'existe pas")
+  if(!dir.exists(dirname(outputMD))) {
+    stop(dirname(outputMD), " n'existe pas")
   }
   
-  message(">> Lecture de ", input)
-  f <- read.csv(input, header = TRUE, sep = ",", encoding = "UTF-8")
+  message(">> Lecture de ", inputCSV)
+  f <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
   message(">> Rendu en cours...")
   res <- renderArreteAsMarkdown(f)
-  message(">> Export de ", output)
-  writeLines(res, output)
+  message(">> Export de ", outputMD)
+  writeLines(res, outputMD)
 }
 
-CSV2HTML <- function(input, output) {
-  if(!file.exists(input)) {
-    stop(input, " n'existe pas")
+CSV2HTML <- function(inputCSV, outputHTML) {
+  if(!file.exists(inputCSV)) {
+    stop(inputCSV, " n'existe pas")
   }
   
-  if(!dir.exists(dirname(output))) {
-    stop(dirname(output), " n'existe pas")
+  if(!dir.exists(dirname(outputHTML))) {
+    stop(dirname(outputHTML), " n'existe pas")
   }
   
-  message(">> Lecture de ", input)
-  f <- read.csv(input, header = TRUE, sep = ",", encoding = "UTF-8")
+  message(">> Lecture de ", inputCSV)
+  f <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
   message(">> Rendu en cours...")
-  res <- renderArreteOfficial(f) %>% as.character
-  message(">> Export de ", output)
-  writeLines(res, output)
+  html <- f %>% renderArreteOfficial
+  message(">> Export de ", outputHTML)
+  writeLines(html, outputHTML)
 }
 
 arrete2List <- function(f) {
@@ -212,7 +212,7 @@ renderArreteAsMarkdown <- function(f) {
   md <- c(md, "**Date de l'arrêté :** ", l$arr_date, "\n\n")
   md <- c(md, "**Référence de l'arrêté :** ", l$arr_ref, "\n\n")
   md <- c(md, "**Objet de l'arrêté :** ", l$arr_objet, "\n\n")
-  md <- c(md, "**Considérant :**\n", l$arr_considerant, "\n\n\n")
+  md <- c(md, "**Considérant :**\n\n", l$arr_considerant, "\n\n\n")
   
   for(article in l$articles) {
     md <- c(md, "# ", article[[1]], "\n")

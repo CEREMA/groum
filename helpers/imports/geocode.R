@@ -20,60 +20,185 @@ as_spatial <- function(df, geom_col = "GEOM_WKT") {
 
 }
 
-CSV2GPKG <- function(input, output, geom = "GEOM_WKT") {
+CSV2GPKG <- function(inputCSV, outputGPKG, geomCol = "GEOM_WKT") {
   
   # Lecture du fichier
-  df <- read_arrete(input)
+  message(">> Lecture de ", inputCSV)
+  df <- read_arrete(inputCSV)
   
   # Conversion en spatial
-  sf.data <- as_spatial(df, geom_col = geom)
+  sf.data <- as_spatial(df, 
+                        geom = geomCol)
       
   # Export
-  export_gpkg(sf.data, output)
+  export_gpkg(sf.data, outputGPKG)
 }
 
-geocodeCSV <- function(input, streets, output, communes = NA) {
-  if(!file.exists(input)) {
-    stop(input, " n'existe pas")
+export_gpkg <- function(f, 
+                        outputFile, 
+                        split_by_geomtype = FALSE) {
+  
+  if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
+    message(">> Export de ", outputFile)
+    st_write(f, outputFile, delete_dsn = TRUE)
+  } else if(!split_by_geomtype) {
+    message(">> Export de ", outputFile)
+    st_write(f, outputFile, delete_dsn = TRUE)
+  } else {
+    # Export des lignes
+    outputLinePath <- gsub(".gpkg$", "-lines.gpkg", outputFile)
+    message(">> Export de ", outputLinePath)
+    f.lines <- f[grep("LINESTRING", st_geometry_type(f)), ]
+    st_write(f.lines, outputLinePath, delete_dsn = TRUE)
+    
+    # Export des polygones
+    outputPolygonPath <- gsub(".gpkg$", "-polygons.gpkg", outputFile)
+    message(">> Export de ", outputPolygonPath)
+    f.polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
+    st_write(f.polygons, outputPolygonPath, delete_dsn = TRUE)
+  }
+}
+
+export_gpkg_by_vehicles <- function(f, outputDir) {
+  
+  f$file_name <- f %>% format_vehicule %>% pull(VEHICULE) %>% {gsub(" ", "-", .)} %>% {glue("{.}.gpkg")}
+  file_names <- unique(f$file_name)
+  
+  for(elt in file_names) {
+    f.sel <- f %>% filter(file_name == elt)
+    export_gpkg(f.sel, file.path(outputDir, elt))
+  }
+}
+
+contains_insee <- function(label) {
+  grepl("^.*([013-9]\\d|2[AB1-9])\\d{3}.*$", label)
+}
+
+geocode_commune <- function(label) {
+  if(contains_insee(label)) {
+    code_insee <- gsub("^.*((?:[013-9]\\d|2[AB1-9])\\d{3}).*$", "\\1", label)
+  } else if(grepl("^Commune.*|^commune.*", label)) {
+    # Commune de ...
+    label <- gsub("(?:C|c)ommune\\s(?:d'|d’|de\\s)?(.*)", "\\1", label)
+    code_insee <- get_code_insee_from_nom(label)
+    # code_insee <- get_code_insee_from_nom(nom_comm, f_ref)
+  } else if(grepl("^Ville.*|^ville.*", label)) {
+    # Ville de ...
+    label <- gsub("^(?:V|v)ille\\s?(?:d'|d’|de)?(.*)$", "\\1", label)
+    code_insee <- get_code_insee_from_nom(label)
+    # code_insee <- get_code_insee_from_nom(nom_comm, f_ref)
+  } else {
+    code_insee <- get_code_insee_from_nom(label)
   }
   
-  if(!dir.exists(dirname(output))) {
-    stop("Dossier ", dirname(output), " inexistant")
+  if(is.null(code_insee)) {
+    return()
+  } else {
+    res <- get_df_commune(code_insee) %>% transform_df
+    return(res)
+  }
+}
+
+geocode_element <- function(label, 
+                            f_ref       = NA, 
+                            nameCol     = "name", 
+                            processMode = "auto",  # auto # manual
+                            findMode    = "distance",
+                            cleanMode   = NA) {
+  # !! empty_sf ptet à réactiver
+  
+  # Choix de la fonction en fonction du mode
+  if(findMode == "distance") {
+    find_function <- find_similar
+  } else {
+    find_function <- find_containing
+  }
+  
+  # AUTO mode
+  if(processMode == "auto") {
+    # Si le mode est auto, on essaie de savoir si on a affaire à une commune ou pas.
+    if(is_commune(label)) {
+        # géocodage de commune (fait appel à API)
+        res <- geocode_commune(label)
+      } else {
+        # on va utiliser nameCol cette fois-ci et on va utiliser f_ref
+        # nameCol doit exister dans f_ref
+        # Si la colonne nameCol n'existe pas, on provoque une erreur
+        if(!(nameCol %in% names(f_ref))) stop("Colonne ", nameCol, " absente.")
+        
+        res <- label %>% 
+          find_function(f_ref      = f_ref,
+                        cleanMode  = cleanMode) %>% 
+          mutate(`type` = "Street") %>% 
+          transform_df
+      }
+  }
+  
+  # MANUAL mode
+  if(processMode == "manual") {
+    res <- label %>% 
+      find_function(f_ref      = f_ref,
+                    cleanMode  = cleanMode) %>% 
+      mutate(`type` = NA) %>% 
+      transform_df
+  }
+    
+  # On cherche la rue dont le nom le plus ressemblant
+  # et on constitue le data frame final
+    
+  
+  return(res)
+}
+
+geocode_CSV <- function(streets, inputCSV, outputCSV, communes = NA) {
+  if(!file.exists(inputCSV)) {
+    stop(inputCSV, " n'existe pas")
+  }
+  
+  if(!dir.exists(dirname(outputCSV))) {
+    stop("Dossier ", dirname(outputCSV), " inexistant")
   }
   
   # On lit le fichier d'entrée
-  df <- read.csv(input, header = TRUE, sep = ",", encoding = "UTF-8")
+  message(">> Lecture de ", inputCSV)
+  df <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
   
   # On récupère le fichier de rues
-  if(!file.exists(input)) {
+  if(!file.exists(inputCSV)) {
     stop("Le fichier de rues ", streets, " n'existe pas")
   }
-  sf_rues <- read_streets(streets)
+  
+  f_ref <- read_streets(streets)
   
   # On apparie
-  res <- get_rues(sf_rues, 
-                  rues = df$EMPRISE_DESIGNATION, 
-                  communes = communes)
+  res <- geocode_elements(labels      = df$EMPRISE_DESIGNATION,
+                          f_ref       = f_ref,
+                          processMode = "auto",
+                          findMode    = "distance")
   
   # On met à jour le fichier initial
   df2 <- df %>% update_file(res = res)
   
   # On l'exporte
-  message(">> Export de ", output)
-  write.csv(df2, output, fileEncoding = "UTF-8", row.names = FALSE)
+  message(">> Export de ", outputCSV)
+  write.csv(df2, outputCSV, fileEncoding = "UTF-8", row.names = FALSE)
 }
 
-# Mode = "distance" (lenvenshtein) ou "inclusion"
-get_rues <- function(sf_rues, rues, mode = "distance", communes = NA) {
+geocode_elements <- function(labels, 
+                             f_ref,               # Fichier de référence depuis lequel contrôler les données
+                             nameCol     = "name",    # Colonne du fichier de référence contenant les noms
+                             processMode = "auto",     # street, commune : réfléchir aussi aux POI
+                             findMode    = "distance") { # 'distance' ou 'containing'
+  
   # message(">> Recherche des rues dont les noms sont les plus proches...")
   
   out <- vector(mode="list")
-  for(i in 1:length(rues)) {
-    rue <- rues[i]
-    res <- get_rue(sf_rues, 
-                   rue = rue, 
-                   mode = mode, 
-                   communes = communes)
+  for(i in 1:length(labels)) {
+    label <- labels[i]
+    res <- geocode_element(label = label, 
+                          f_ref,
+                          processMode = processMode,
+                          findMode = findMode)
     out[[i]] <- res
   }
   
@@ -95,12 +220,34 @@ empty_sf <- function(rue) {
     st_set_crs(4326)
 }
 
-get_commune <- function(rue, comms) {
+get_code_insee_from_nom <- function(label) {
+  url <- glue("https://geo.api.gouv.fr/communes?nom={label}&fields=departement&boost=population&limit=5")
+  code_insee   <- try(jsonlite::fromJSON(url)$code[1], silent = TRUE)
+  if(!inherits(code_insee, "try-error")) {
+    code_insee
+  } else {
+    return()
+  }
+}
+
+get_wkt_from_insee <- function(code_insee) {
   
-  libelle <- rue
+  url <- glue("https://geo.api.gouv.fr/communes/{code_insee}?format=geojson&geometry=contour&fields=geometry")
   
-  # On récupère le code INSEE depuis la rue
-  code_insee <- get_insee_from_libelle(libelle, comms)
+  j <- jsonlite::fromJSON(url)
+  
+  coords   <- j$geometry$coordinates[1,,]
+  geometry <- st_polygon(list(coords)) %>% st_sfc %>% st_set_crs(4326)
+  nom      <- j$properties$nom
+  wkt      <- geometry %>% st_as_text()
+  
+  list(code_insee = code_insee,
+       nom        = nom,
+       wkt        = wkt, 
+       geometry   = geometry)
+}
+
+get_df_commune <- function(code_insee) {
   
   # Si le code INSEE est nul, alors on renvoie un sf data frame vide
   if(is.null(code_insee)) {
@@ -109,27 +256,25 @@ get_commune <- function(rue, comms) {
   }
   
   # On récupère la chaîne WKT correspondant au code commune
-  res <- get_wkt_from_insee(code_insee, 
-                            comms)
+  # Utilise geo.api.gouv.fr
+  res <- get_wkt_from_insee(code_insee)
   
   # Si le code INSEE n'est pas dans le libellé de rue, alors on reformate l'entrée
-  if(!grepl(res$code_insee, libelle)) {
-    libelle <- glue("{libelle} ({code_insee})")
-  }
+  libelle <- glue("{res$nom} ({res$code_insee})")
   
   # On crée l'objet résultat
-  res <- data.frame(name  = libelle, 
-                    type  = "City",
-                    union = NA, 
-                    n     = NA,
-                    wkt   = res$wkt,
+  res <- data.frame(name     = libelle, 
+                    type     = "City",
+                    union    = NA, 
+                    n        = NA,
+                    wkt      = res$wkt,
                     distance = NA
                     ) %>% 
     st_as_sf(wkt = "wkt") %>% 
     rename(geometry = wkt) %>% 
     mutate(wkt = res$wkt) %>% 
     st_set_crs(4326) %>% 
-    select(name, type, union, n, wkt, geometry)
+    dplyr::select(name, type, union, n, wkt, geometry)
   
   # Ajout de la colonne géométrie
   # res$geometry <- st_geometry(res)
@@ -139,72 +284,172 @@ get_commune <- function(rue, comms) {
   #             sf_data = res))
 }
 
-get_rue <- function(rue, sf_rues, mode = "distance", communes = NA) {
-  
-  # Commune ou rue ?
-  # Récupération de la commune
-  if(is_commune(rue)) {
-    if(!is.na(communes)) {
-      if(!file.exists(communes)) {
-        message(">> Le fichier communes ", communes, "n'a pas été trouvé, donc il n'est pas possible de géocoder la commune.")
-        data <- empty_sf(rue)
-      } else {
-        message(">> Lecture du fichier ", communes)
-        comms <- st_read(communes)
-        data <- get_commune(rue, 
-                            comms = comms) # !! renommer la fonction
-      }
-    } else {
-      message(">> Le fichier communes n'a pas été spécifié. Nous ne rajouterons donc pas la géométrie de la commune.")
-      data <- empty_sf(rue)
-    }
-  # Récupération de la rue
-  } else  {
-    # Choix de la fonction
-    if(mode == "distance") {
-      thefunction <- find_similar_streets
-    } else {
-      thefunction <- find_streets_containing
-    }
-    
-    # On cherche la rue la plus ressemblante
-    res <- thefunction(sf_rues, 
-                       rue = as.character(rue),
-                       n = 1)
-    
-    # On en récupère la chaîne WKT
-    data <- get_wkt(rue     = as.character(res$name),
-                    sf_rues = sf_rues) %>% 
-      mutate(distance = res$distance)
-  }
+transform_df <- function(df) {
+  df %>% dplyr::select(name, type, union, n, wkt, geometry)
+}
 
-  return(data)
+OLD_geocode_element <- function(label,
+                            f_ref,
+                            nameCol = "name",
+                            mode = "distance",
+                            type = "Street") {
+  
+  if(!(nameCol %in% names(f_ref))) stop("Colonne ", nameCol, " absente.")
+  
+  # Récupération de la commune
+  # Choix de la fonction
+  if(mode == "distance") {
+    my_find_function <- find_similar
+  } else {
+    my_find_function <- find_containing
+  }
+  
+  # On cherche la rue la plus ressemblante
+  res <- label %>% 
+    my_find_function(f_ref = f_ref,
+                type  = type) %>% 
+    mutate(`type` = type) %>% 
+    transform_df
+  
+  # On en récupère la chaîne WKT
+  # res2 <- get_wkt(label = as.character(res$name),
+  #                 f_ref = f_ref) %>% 
+  #   mutate(distance = res$distance)
+  # 
+  # res$type <- type
+  # 
+  # res <- res 
+  
+  return(res)
   # return(list(df_data = as.data.frame(data) %>% drop_geometry_column, 
   #             sf_data = data))
 }
 
-find_similar_streets <- function(sf_rues, rue, n = 5) {
+# Méthode permettant de trouver les rues qui contiennent 
+# un des éléments compris dans une chaîne de caractères
+# Par exemple, "Philippe Solari" va être trouvé dans "Avenue Philippe Solari" 
+# avec un score de 2 puisque Philippe et Solari sont tous deux trouvés
+# (Avenue est supprimé de la recherche)
+# "Rue Philippe Rollin" aura un score de 1
+# Ainsi, si n_result est égal à 1, le score le plus haut sera retourné
+# et "Avenue Philippe Solari" constituera la réponse
+find_containing <- function(rue, f_ref, n, nameCol = "name", area = "commune") {
+  message(">> Mode : find streets containing")
+  f_ref_names <- unique(f_ref[[nameCol]])
+  clean1 <- clean_street_names(rue)
+  clean2 <- clean_street_names(f_ref_names)
+  split1 <- strsplit(clean1, " ")[[1]]
+  split2 <- strsplit(clean2, " ")
+  
+  out <- vector(mode = "list")
+  i <- 1
+  j <- 1
+  for(elt1 in split1) {
+    message(">", elt1)
+    for(j in 1:length(split2)) {
+      
+      elt2 <- split2[[j]]
+      
+      elt2 <- setdiff(elt2, c("de", "du", "des", "d'"))
+      elt2 <- setdiff(elt2, c("la", "le", "les"))
+      elt2 <- setdiff(elt2, c("et", "en"))
+      
+      for(elt3 in elt2) {
+        if(elt1 == elt3) {
+          destination <- paste(elt2, collapse = " ")
+          out[[i]] <- data.frame(element = elt1, index = j)
+          i <- i + 1
+        }
+      }
+    }
+  }
+  
+  if(length(out) == 0) return()
+  
+  res <- do.call(rbind, out) %>% 
+    group_by(index) %>% 
+    summarize(note = n(), elements = paste(element, collapse=", ")) %>% 
+    data.frame %>% 
+    ungroup %>% 
+    arrange(desc(note)) %>% 
+    head(n) %>% 
+    mutate(source = rue) %>% 
+    mutate(name = f_ref_names[.$index])
+  
+  return(res)
+}
+
+clean_commune_names <- function(label) {
+  label <- gsub("Ville de ", "", label)
+  label <- gsub("ville de ", "", label)
+  label <- gsub("Commune de ", "", label)
+  label <- gsub("commune de ", "", label)
+  label <- gsub("*([013-9]\\d|2[AB1-9])\\d{3}", "", label)
+  label <- gsub("\\)", "", label)
+  label <- gsub("\\(", "", label)
+  label <- trimws(label, which = "both")
+  label
+}
+
+find_similar <- function(label,
+                         f_ref, 
+                         nameCol   = "name",
+                         cleanMode = NA) {
   
   # message(">> Find similar Streets")
   
+  # Choix de la fonction de nettoyage
+  if(is.na(cleanMode)) {
+    sourceLabels <- label
+    targetLabels <- f_ref[[nameCol]]
+  } else if(cleanMode == "Street") {
+    sourceLabels <- clean_street_names(label)
+    targetLabels <- clean_street_names(f_ref[[nameCol]])
+  } else if (cleanMode == "city") {
+    sourceLabels <- clean_commune_names(label)
+    targetLabels <- clean_commune_names(f_ref[[nameCol]])
+  }
+  
   # Distance de levenshtein entre les rues
-  d <- stringdist(clean_street_names(rue), 
-                  clean_street_names(sf_rues$name), 
+  d <- stringdist(sourceLabels, 
+                  targetLabels,
                   method = "dl")
   
   # Récupération de la meilleure note pour la rue
-  df <- data.frame(name = sf_rues$name, 
+  df <- data.frame(name     = f_ref[[nameCol]], 
                    distance = d,
-                   osm_id = sf_rues$osm_id) %>% 
-    group_by(name) %>% 
-    summarize(osm_ids = paste(osm_id, collapse=","), 
-              distance = mean(distance), 
-              n_streets = n()) %>% 
+                   # id       = f_ref[[idCol]]) %>% 
+                   id       = 1:nrow(f_ref)) %>% 
+    group_by_at(nameCol) %>% 
+    summarize(ids       = paste(id, collapse=","), 
+              distance  = mean(distance), 
+              n         = n()) %>% 
     data.frame %>% 
     # On trie selon la note
     arrange(distance) %>% 
     # On prend les n résultats
-    head(n)
+    head(1)
+  
+  # Ajout de la composante géométrique
+  w <- which(f_ref[[nameCol]] == df$name)
+  f_sel <- f_ref %>% slice(w)
+  n_geoms <- f_sel %>% nrow
+  if(n_geoms == 1) {
+    geom <- f_sel %>% st_geometry
+    df$wkt   <- geom %>%  st_as_text()
+    df$union <- FALSE
+    st_geometry(df)  <- geom
+  } else {
+    geom <- st_union(f_sel)
+    df$wkt   <- geom %>% st_as_text()
+    df$union <- TRUE
+    st_geometry(df)  <- geom
+  }
+  
+  # WKT
+  # res2 <- get_wkt(label = as.character(res$name),
+  #                 f_ref = f_ref) %>% 
+  #   mutate(distance = res$distance)
   
   return(df)
 }
@@ -297,24 +542,27 @@ is_commune <- function(libelle) {
   grepl("^Commune.*|^commune.*|^Ville.*|^ville.*$|^.*([013-9]\\d|2[AB1-9])\\d{3}.*$", libelle)
 }
 
-get_wkt <- function(sf_rues, rue = NA, the_index = NA) {
+OLD_get_wkt <- function(label = NA, 
+                    f_ref, 
+                    # the_index = NA,
+                    nameCol = "name") {
   
   # On se base sur l'OSM ID si pas de nom de rue
   # Pas de fusion des géométries
-  if(is.na(rue)) {
-    n <- 1
-    f.sel <- sf_rues %>% filter(index == the_index)
-    geom <- f.sel  %>% st_geometry
-    wkt <- geom %>% st_as_text()
-    nom_rue <- f.sel$name
-    union <- FALSE
-  }
+  # if(is.na(label)) {
+  #   n <- 1
+  #   f.sel <- f_ref %>% filter(index == the_index)
+  #   geom <- f.sel  %>% st_geometry
+  #   wkt <- geom %>% st_as_text()
+  #   nom_rue <- f.sel$name
+  #   union <- FALSE
+  # }
   
   # On se base sur name
   # Fusion des géométries
-  if(is.na(the_index)) {
-    w <- which(sf_rues$name == rue)
-    f.sel <- sf_rues %>% slice(w)
+  # if(is.na(the_index)) {
+    w <- which(f_ref[[nameCol]] == label)
+    f.sel <- f_ref %>% slice(w)
     n <- f.sel %>% nrow
     if(n == 1) {
       geom <- f.sel %>% st_geometry
@@ -325,10 +573,10 @@ get_wkt <- function(sf_rues, rue = NA, the_index = NA) {
       wkt <- geom %>% st_as_text()
       union <- TRUE
     }
-  }
+  # }
   
-  res <- data.frame(name  = rue, 
-                    type  = "Street",
+  res <- data.frame(name  = label,
+                    type  = "Street", # !! changer cela
                     union = union, 
                     n     = n,
                     wkt   = wkt)
