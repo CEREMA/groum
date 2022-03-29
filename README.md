@@ -90,6 +90,10 @@ On peut afficher le résultat sous QGIS :
 
 ![](files/qgis.png)
 
+## Exemples de scripts
+- [](exemples-geocodage.bat) contient des exemples d'exécution pour le géocodage
+- [](exemples-conversion.bat) contient des exemples d'exécution pour la conversion en arrêté, en carte
+
 ## Licence
 - groum a été créé en Mars 2022
 - Licence : [Licence Affero](LICENSE)  
