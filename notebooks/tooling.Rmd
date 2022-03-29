@@ -89,7 +89,10 @@ Contrôle de la donnée :
 read.csv("../outputs/arrete-cassis2.csv", sep=",", encoding = "UTF-8") %>% names
 ```
 
-# Conversion en intégrant la commune
+## Conversion en intégrant la commune
+A FAIRE
+
+## Conversion de POI
 A FAIRE
 
 # Conversion du fichier en Markdown
@@ -126,12 +129,13 @@ Export des données complètes sans séparation selon le type de véhicule
 ```{r}
 source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
-inputCSV  <- "../outputs/arrete-cassis-geo.csv" # CSV géocodé
+inputCSV  <- "../data/arrete-cassis-geo2.csv" # CSV géocodé
 file.exists(inputCSV)
 
 CSV2GPKG(inputCSV   = inputCSV,
-         outputGPKG = "../outputs/cassis.gpkg",
+         outputGPKG = "../outputs/arrete-cassis-geo2.gpkg",
          geomCol    = "X_GEOM_WKT")
 ```
 
 # Export des cartes
+A FAIRE

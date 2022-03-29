@@ -27,11 +27,11 @@ file.copy("../schema-arrete-circulation-marchandises/schema.json",
           overwrite = T)
 
 # Copie des données
-file.copy("../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv",
+file.copy("../schema-arrete-circulation-marchandises-private/Collectivités/Cassis/3-arrete/arrete-cassis.csv",
           file.path("data", "arrete-cassis.csv"),
           overwrite = T)
 
 # Copie du JSON de rues
-file.copy("../schema-arrete-circulation-marchandises-private/Cassis/13022-Cassis.geojson",
+file.copy("../schema-arrete-circulation-marchandises-private/Collectivités/Cassis/13022-Cassis.geojson",
           file.path("data", "13022-Cassis.geojson"),
           overwrite = T)

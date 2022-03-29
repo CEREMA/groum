@@ -1,5 +1,7 @@
 as_spatial <- function(df, geom_col = "GEOM_WKT") {
+  
   if(!(geom_col %in% names(df))) {
+    # Si la colonne géométrique n'existe pas
     the_col <- grep("GEOM_WKT", names(df))
     if(length(the_col) == 0) {
       stop("La colonne ", geom_col, " n'existe pas. Avez-vous voulu dire ", the_col, " ?")
@@ -7,17 +9,24 @@ as_spatial <- function(df, geom_col = "GEOM_WKT") {
       stop("La colonne ", geom_col, " n'existe pas")
     }
   } else {
+    
+    # Si la colonne géométrique ne comprend pas de valeurs
     if(all(is.na(df[[geom_col]])) | all(df[[geom_col]] == "")) {
       stop("La colonne ", geom_col, " est vide")
     } else {
-      w <- which(df[[geom_col]] != "")
+      
+      # w <- which(df[[geom_col]] != "" | df[[geom_col]] == "N/C" | df[[geom_col]] == "NA" | is.na(df[[geom_col]]))
+      w <- grep("^(point|multipoint|line|multiline|polygon|multipolygon|geometry)", tolower(df[[geom_col]]))
+
       if(length(w) == 0) stop("La colonne ", geom_col, " est vide")
-      df <- df[w, ]
+      
+      # On met une géométrie vide si pas de géométrie pour la ligne
+      df[[geom_col]][-w] <- "POINT EMPTY"
       st_geometry(df) <- st_as_sfc(df[[geom_col]])
-      df %>% st_set_crs(4326)
+      
+      return(df)
     }
   }
-
 }
 
 CSV2GPKG <- function(inputCSV, outputGPKG, geomCol = "GEOM_WKT") {
@@ -27,36 +36,38 @@ CSV2GPKG <- function(inputCSV, outputGPKG, geomCol = "GEOM_WKT") {
   df <- read_arrete(inputCSV)
   
   # Conversion en spatial
-  sf.data <- as_spatial(df, 
-                        geom = geomCol)
+  f <- as_spatial(df, geom = geomCol)
       
   # Export
-  export_gpkg(sf.data, outputGPKG)
+  export_gpkg(f, outputGPKG)
 }
 
 export_gpkg <- function(f, 
                         outputFile, 
                         split_by_geomtype = FALSE) {
   
-  if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
-    message(">> Export de ", outputFile)
-    st_write(f, outputFile, delete_dsn = TRUE)
-  } else if(!split_by_geomtype) {
-    message(">> Export de ", outputFile)
-    st_write(f, outputFile, delete_dsn = TRUE)
-  } else {
-    # Export des lignes
-    outputLinePath <- gsub(".gpkg$", "-lines.gpkg", outputFile)
-    message(">> Export de ", outputLinePath)
-    f.lines <- f[grep("LINESTRING", st_geometry_type(f)), ]
-    st_write(f.lines, outputLinePath, delete_dsn = TRUE)
-    
-    # Export des polygones
-    outputPolygonPath <- gsub(".gpkg$", "-polygons.gpkg", outputFile)
-    message(">> Export de ", outputPolygonPath)
-    f.polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
-    st_write(f.polygons, outputPolygonPath, delete_dsn = TRUE)
-  }
+  st_write(f, outputFile, delete_dsn = TRUE)
+  
+  # if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
+  #   # Si on n'a pas de surfaces, alors on exporte directement les lignes en un seul fichier
+  #   message(">> Export de ", outputFile)
+  #   st_write(f, outputFile, delete_dsn = TRUE)
+  # } else if(!split_by_geomtype) {
+  #   message(">> Export de ", outputFile)
+  #   st_write(f, outputFile, delete_dsn = TRUE)
+  # } else {
+  #   # Export des lignes
+  #   outputLinePath <- gsub(".gpkg$", "-lines.gpkg", outputFile)
+  #   message(">> Export de ", outputLinePath)
+  #   f.lines <- f[grep("LINESTRING", st_geometry_type(f)), ]
+  #   st_write(f.lines, outputLinePath, delete_dsn = TRUE)
+  #   
+  #   # Export des polygones
+  #   outputPolygonPath <- gsub(".gpkg$", "-polygons.gpkg", outputFile)
+  #   message(">> Export de ", outputPolygonPath)
+  #   f.polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
+  #   st_write(f.polygons, outputPolygonPath, delete_dsn = TRUE)
+  # }
 }
 
 export_gpkg_by_vehicles <- function(f, outputDir) {
