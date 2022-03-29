@@ -32,7 +32,7 @@ source("../../groum-groum/src/shinyapp/libraries.R", encoding="UTF-8")
 
 # Géocodage de rue
 ```{r}
-source("../helpers/main.R")
+source("../functions/functions.R")
 source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
 geocode_street(street      = "Chem. du plan d'Ollive",
@@ -41,7 +41,7 @@ geocode_street(street      = "Chem. du plan d'Ollive",
 
 Recherche de plusieurs rues
 ```{r}
-source("../helpers/main.R")
+source("../functions/functions.R")
 source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
 geocode_street(street      = "Chem. du plan d'Ollive, esplanade Charles de Gaule", 
@@ -50,7 +50,7 @@ geocode_street(street      = "Chem. du plan d'Ollive, esplanade Charles de Gaule
 
 # Recherche de commune
 ```{r}
-source("../helpers/main.R", encoding="UTF-8")
+source("../functions/functions.R", encoding="UTF-8")
 source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
 geocode_street(street = "commune de Cassis")
@@ -59,7 +59,7 @@ geocode_street(street = "commune de Cassis")
 
 # Recherche de rue et de commune
 ```{r}
-source("../helpers/main.R")
+source("../functions/functions.R")
 source("../../groum-groum/src/shinyapp/helpers/geocode.R", encoding="UTF-8")
 
 geocode_street(street     = "Chem. du plan d'Ollive, commune de Cassis", 
@@ -139,9 +139,9 @@ CSV2GPKG(inputCSV   = inputCSV,
 
 # Export des cartes
 ```{r}
-source("../helpers/main.R", encoding = "UTF-8")
+source("../functions/functions.R", encoding = "UTF-8")
 
-export_snapshot(
+CSV2JPEG(
 inputCSV   = "../data/arrete-cassis-geo2.csv",
 geomCol    = "X_GEOM_WKT",
 outputJPEG = "../outputs/cassis.jpeg",

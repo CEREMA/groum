@@ -15,8 +15,7 @@ Il s'agit d'utilitaires associés au schéma [http://schema.data.gouv.fr/CEREMA/
 ## Installation
 [Installer et configurer `groum`](INSTALL.md)
 
-## Géocoder
-### Trouver une rue
+## Trouver une rue
 On recherche `'Chemain du Plan d'Ollive'` (volontairement mal orthographiée) dans le fichier geojson `13022-Cassis.geojson` (d'autres formats : shp, gpkg, sont acceptés)
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive" --streets="data/13022-Cassis.geojson"
@@ -32,23 +31,22 @@ Voici le résultat dans l'invite de commandes :
 
 ![](files/geocode-single.png)
 
-### Pour plusieurs rues
+## Trouver plusieurs rues
 Trouve Chemain du Plan d'Ollive,esplanade Charle de Gaule dans le fichier 13022-Cassis.geojson
 
 	%R_BIN%\Rscript.exe groum.R --input="Chemain du Plan d'Ollive,esplanade Charle de Gaule" --streets="data/13022-Cassis.geojson"
 
-### Trouver une commune
+## Trouver une commune
 Trouve la géométrie de la commune de Cassis
 
 	%R_BIN%\Rscript.exe groum.R --input="Commune de Cassis"
 
 > Pas besoin d'indiquer le fichier geojson car l'API geo.api.gouv.fr est utilisée pour ce faire
 
-### Trouver un POI
+## Trouver un POI
 En cours d'écriture...
 
-## Conversions
-### Du CSV au GeoCSV
+## Géocoder le fichier d'arrêtés
 
 Cette fonction crée une version GeoCSV du fichier en ajoutant des colonnes géométriques au fichier initial
 
@@ -58,10 +56,10 @@ Cette fonction crée une version GeoCSV du fichier en ajoutant des colonnes géo
 
 > Dans l'exemple ci-dessus, certaines rues ont mal été trouvées dans le fichier d'origine. Cela peut être dû à leur absence dans le fichier GeoJSON d'origine, ou à une écriture très différente.
 
-#### Sortie
+### Sortie
 Le fichier `arrete-cassis-geo.csv` contiendra des colonnes supplémentaires dont `X_EMPRISE_DESIGNATION` avec le nom de la rue le plus similaire qui a été trouvé et `X_GEOM_WKT` avec la géométrie de la rue au format WKT.
 
-### Du CSV à l'arrêté HTML
+## Générer l'arrêté
 Cette fonction génère l'arrêté depuis les données, sous une forme lisible au format HTML, et ainsi de contrôler le résultat de la numérisation (adéquation à l'arrêté d'origine)
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.html"
@@ -70,17 +68,30 @@ Cette fonction génère l'arrêté depuis les données, sous une forme lisible a
 
 > La fonction de génération d'arrêté est encore à l'état expérimental
 
-### Du GeoCSV au fichier GPKG
-Cette fonction crée le fichier spatial depuis le fichier de données d'arrêtés de manière à pouvoir l'afficher dans un logiciel type QGIS
-
-	%R_BIN%\Rscript.exe groum.R --input="outputs/arrete-cassis-geo.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
-
-![](files/spatial.png)
-
-## Du CSV à l'arrêté en Markdown
+## Générer l'arrêté en Markdown
 Générer l'arrêté depuis les données, au format Markdown
 
 	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.md"
+
+## Créer une carte d'aperçu
+On peut créer une image JPEG depuis le fichier de données d'arrêtés géocodé
+
+	%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo2.csv" --output="outputs/arrete-cassis.jpeg" --geom=X_GEOM_WKT
+
+Voici le résultat :
+
+![](outputs/cassis.jpeg)
+
+## Créer les fichiers géographiques
+Cette fonction crée le fichier spatial depuis le fichier de données d'arrêtés géocodé
+
+	%R_BIN%\Rscript.exe groum.R --input="outputs/arrete-cassis-geo.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
+
+> Il faut, ici, que la colonne `X_GEOM_WKT` comprenne la géométrie de chaque rue ou emprise au format WKT.
+
+On peut afficher le résultat sous QGIS :
+
+![](files/qgis.png)
 
 ## Licence
 [Licence Affero](LICENSE)  

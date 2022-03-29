@@ -39,6 +39,7 @@ CSV2GPKG <- function(inputCSV, outputGPKG, geomCol = "GEOM_WKT") {
   f <- as_spatial(df, geom = geomCol)
       
   # Export
+  message(">> Export vers ", outputGPKG)
   export_gpkg(f, outputGPKG)
 }
 

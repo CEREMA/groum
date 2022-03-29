@@ -96,7 +96,7 @@ CSV2MD <- function(inputCSV, outputMD) {
   f <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
   message(">> Rendu en cours...")
   res <- renderArreteAsMarkdown(f)
-  message(">> Export de ", outputMD)
+  message(">> Export vers ", outputMD)
   writeLines(res, outputMD)
 }
 

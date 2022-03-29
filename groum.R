@@ -13,11 +13,11 @@ suppressMessages(library(shiny, quietly = T))
 # library(lubridate)
 # library(shiny)
 
-source("helpers/main.R")
-source("helpers/imports/main.R")
-source("helpers/imports/geocode.R")
-source("helpers/imports/markdown.R")
-source("helpers/imports/opening-hours.R")
+source("functions/functions.R", encoding = "UTF-8")
+source("functions/imports/main.R", encoding = "UTF-8")
+source("functions/imports/geocode.R", encoding = "UTF-8")
+source("functions/imports/markdown.R", encoding = "UTF-8")
+source("functions/imports/opening-hours.R", encoding = "UTF-8")
 
 # Config ----
 parser <- OptionParser()
@@ -37,7 +37,7 @@ parser <- add_option(parser, c("-s", "--streets"),
                      metavar="Spatial")
 
 parser <- add_option(parser, c("-g", "--geom"), 
-                     dest="geom",
+                     dest="geomcol",
                      help="Geometry column in the CSV file (for the conversion to GPKG)", 
                      metavar="GeomCol")
 
@@ -74,7 +74,13 @@ groum <- function(args) {
 
     CSV2GPKG(inputCSV   = args$input,
              outputGPKG = args$output,
-             geomCol    = "X_GEOM_WKT")
+             geomCol    = args$geomcol)
+    
+  } else if(extension == "jpeg") {
+    
+    CSV2JPEG(inputCSV   = args$input,
+             outputJPEG = args$output,
+             geomCol    = args$geomcol)
   }
 }
 
