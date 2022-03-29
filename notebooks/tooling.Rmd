@@ -138,4 +138,12 @@ CSV2GPKG(inputCSV   = inputCSV,
 ```
 
 # Export des cartes
-A FAIRE
+```{r}
+source("../helpers/main.R", encoding = "UTF-8")
+
+export_snapshot(
+inputCSV   = "../data/arrete-cassis-geo2.csv",
+geomCol    = "X_GEOM_WKT",
+outputJPEG = "../outputs/cassis.jpeg",
+width      = 800)
+```
