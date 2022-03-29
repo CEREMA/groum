@@ -6,11 +6,9 @@ Il s'agit d'utilitaires associés au schéma [http://schema.data.gouv.fr/CEREMA/
 
 `groum` permet de :
 
-- Trouver la géométrie de rues ;
-- Trouver la géométrie de communes ;
-- Géocoder un fichier d'arrêtés, à savoir trouver la géométrie des rues qui le composent ;
-- Convertir un fichier d'arrêtés CSV en HTML ;
-- Convertir un fichier d'arrêtés CSV en Markdown
+- Trouver la géométrie de rues, de communes et d'autres POI
+- Géocoder le fichier d'arrêtés et créer les fichiers géographiques et cartes qui y sont associés
+- Générer l'arrêté depuis le fichier de données
 
 ## Installation
 [Installer et configurer `groum`](INSTALL.md)
