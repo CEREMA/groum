@@ -3,7 +3,7 @@
 "0",""
 "0","CSV2MD(input  = inputCSV, "
 "0","       output = ""../outputs/cassis.md"")"
-"2",">> Lecture de ../data/arrete-cassis.csv
+"2",">> Lecture de ../../schema-arrete-circulation-marchandises-private/Cassis/arrete-cassis.csv
 "
 "2",">> Rendu en cours...
 "
