@@ -10,13 +10,13 @@ echo.
 echo --------------------------------------------------------------------------------------------------------------------------------------
 
 echo 6/8 - CSV vers GPKG
-%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo2.csv" --output="outputs/arrete-cassis.gpkg" --geom=X_GEOM_WKT
+%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.gpkg" --geom=GEOM_WKT
 echo.
 
 echo --------------------------------------------------------------------------------------------------------------------------------------
 
 echo 7/8 - CSV vers JPEG
-%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo2.csv" --output="outputs/arrete-cassis.jpeg" --geom=X_GEOM_WKT
+%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.jpeg" --geom=GEOM_WKT
 
 echo --------------------------------------------------------------------------------------------------------------------------------------
 
