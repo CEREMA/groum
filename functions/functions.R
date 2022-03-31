@@ -6,7 +6,7 @@ CSV2JPEG <- function(inputCSV, geomCol = "GEOM_WKT", outputJPEG, width = 800) {
   # outputJPEG = "../outputs/cassis.jpeg",
   # width = 1200)
   
-  message(">> Lecture de ", inputCSV)
+  message("Lecture de ", inputCSV)
   f <- read_arrete(inputCSV) %>% as_spatial(geom_col = geomCol)
   
   # Points, lignes et polygones
@@ -20,7 +20,7 @@ CSV2JPEG <- function(inputCSV, geomCol = "GEOM_WKT", outputJPEG, width = 800) {
   ratio <- abs(bb$ymin - bb$ymax) / abs(bb$xmin - bb$xmax)
   
   # Export
-  message(">> Export vers ", outputJPEG)
+  message("Export vers ", outputJPEG)
   jpeg(filename = outputJPEG, width=width, height = width*ratio)
   
   # Eléments cartos

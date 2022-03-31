@@ -14,10 +14,10 @@ suppressMessages(library(shiny, quietly = T))
 # library(shiny)
 
 source("functions/functions.R", encoding = "UTF-8")
-source("functions/imports/main.R", encoding = "UTF-8")
-source("functions/imports/geocode.R", encoding = "UTF-8")
-source("functions/imports/markdown.R", encoding = "UTF-8")
-source("functions/imports/opening-hours.R", encoding = "UTF-8")
+source("functions/geocode.R", encoding = "UTF-8")
+source("functions/markdown.R", encoding = "UTF-8")
+source("functions/opening-hours.R", encoding = "UTF-8")
+source("functions/imports/groum-groum/functions.R", encoding = "UTF-8")
 
 # Config ----
 parser <- OptionParser()
@@ -70,11 +70,11 @@ groum <- function(args) {
     CSV2HTML(inputCSV   = args$input,
              outputHTML = args$output)
 
-  } else if(extension == "gpkg") {
+  } else if(extension %in% c("gpkg", "geojson", "shp")) {
 
-    CSV2GPKG(inputCSV   = args$input,
-             outputGPKG = args$output,
-             geomCol    = args$geomcol)
+    CSV2GPKG(inputCSV      = args$input,
+             outputSpatial = args$output,
+             geomCol       = args$geomcol)
     
   } else if(extension == "jpeg") {
     

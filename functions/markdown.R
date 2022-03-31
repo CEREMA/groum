@@ -92,11 +92,11 @@ CSV2MD <- function(inputCSV, outputMD) {
     stop(dirname(outputMD), " n'existe pas")
   }
   
-  message(">> Lecture de ", inputCSV)
+  message("Lecture de ", inputCSV)
   f <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
-  message(">> Rendu en cours...")
+  message("Rendu en cours...")
   res <- renderArreteAsMarkdown(f)
-  message(">> Export vers ", outputMD)
+  message("Export vers ", outputMD)
   writeLines(res, outputMD)
 }
 
@@ -109,11 +109,11 @@ CSV2HTML <- function(inputCSV, outputHTML) {
     stop(dirname(outputHTML), " n'existe pas")
   }
   
-  message(">> Lecture de ", inputCSV)
+  message("Lecture de ", inputCSV)
   f <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
-  message(">> Rendu en cours...")
+  message("Rendu en cours...")
   html <- f %>% renderArreteOfficial
-  message(">> Export de ", outputHTML)
+  message("Export de ", outputHTML)
   writeLines(html, outputHTML)
 }
 

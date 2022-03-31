@@ -29,43 +29,45 @@ as_spatial <- function(df, geom_col = "GEOM_WKT") {
   }
 }
 
-CSV2GPKG <- function(inputCSV, outputGPKG, geomCol = "GEOM_WKT") {
+CSV2GPKG <- function(inputCSV, outputSpatial, geomCol = "GEOM_WKT") {
   
   # Lecture du fichier
-  message(">> Lecture de ", inputCSV)
+  message("Lecture de ", inputCSV)
   df <- read_arrete(inputCSV)
   
   # Conversion en spatial
   f <- as_spatial(df, geom = geomCol)
       
   # Export
-  message(">> Export vers ", outputGPKG)
-  export_gpkg(f, outputGPKG)
+  message("Export vers ", outputSpatial)
+  export_spatial(f, outputSpatial)
 }
 
-export_gpkg <- function(f, 
-                        outputFile, 
+export_spatial <- function(f, 
+                        outputSpatial, 
                         split_by_geomtype = FALSE) {
   
-  st_write(f, outputFile, delete_dsn = TRUE)
+  st_write(f %>% st_set_crs(4326), 
+           outputSpatial, 
+           delete_dsn = TRUE)
   
   # if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
   #   # Si on n'a pas de surfaces, alors on exporte directement les lignes en un seul fichier
-  #   message(">> Export de ", outputFile)
+  #   message("Export de ", outputFile)
   #   st_write(f, outputFile, delete_dsn = TRUE)
   # } else if(!split_by_geomtype) {
-  #   message(">> Export de ", outputFile)
+  #   message("Export de ", outputFile)
   #   st_write(f, outputFile, delete_dsn = TRUE)
   # } else {
   #   # Export des lignes
   #   outputLinePath <- gsub(".gpkg$", "-lines.gpkg", outputFile)
-  #   message(">> Export de ", outputLinePath)
+  #   message("Export de ", outputLinePath)
   #   f.lines <- f[grep("LINESTRING", st_geometry_type(f)), ]
   #   st_write(f.lines, outputLinePath, delete_dsn = TRUE)
   #   
   #   # Export des polygones
   #   outputPolygonPath <- gsub(".gpkg$", "-polygons.gpkg", outputFile)
-  #   message(">> Export de ", outputPolygonPath)
+  #   message("Export de ", outputPolygonPath)
   #   f.polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
   #   st_write(f.polygons, outputPolygonPath, delete_dsn = TRUE)
   # }
@@ -172,7 +174,7 @@ geocode_CSV <- function(streets, inputCSV, outputCSV, communes = NA) {
   }
   
   # On lit le fichier d'entrée
-  message(">> Lecture de ", inputCSV)
+  message("Lecture de ", inputCSV)
   df <- read.csv(inputCSV, header = TRUE, sep = ",", encoding = "UTF-8")
   
   # On récupère le fichier de rues
@@ -192,7 +194,7 @@ geocode_CSV <- function(streets, inputCSV, outputCSV, communes = NA) {
   df2 <- df %>% update_file(res = res)
   
   # On l'exporte
-  message(">> Export de ", outputCSV)
+  message("Export de ", outputCSV)
   write.csv(df2, outputCSV, fileEncoding = "UTF-8", row.names = FALSE)
 }
 
@@ -202,7 +204,7 @@ geocode_elements <- function(labels,
                              processMode = "auto",     # street, commune : réfléchir aussi aux POI
                              findMode    = "distance") { # 'distance' ou 'containing'
   
-  # message(">> Recherche des rues dont les noms sont les plus proches...")
+  # message("Recherche des rues dont les noms sont les plus proches...")
   
   out <- vector(mode="list")
   for(i in 1:length(labels)) {
@@ -346,7 +348,7 @@ OLD_geocode_element <- function(label,
 # Ainsi, si n_result est égal à 1, le score le plus haut sera retourné
 # et "Avenue Philippe Solari" constituera la réponse
 find_containing <- function(rue, f_ref, n, nameCol = "name", area = "commune") {
-  message(">> Mode : find streets containing")
+  message("Mode : find streets containing")
   f_ref_names <- unique(f_ref[[nameCol]])
   clean1 <- clean_street_names(rue)
   clean2 <- clean_street_names(f_ref_names)
@@ -408,7 +410,7 @@ find_similar <- function(label,
                          nameCol   = "name",
                          cleanMode = NA) {
   
-  # message(">> Find similar Streets")
+  # message("Find similar Streets")
   
   # Choix de la fonction de nettoyage
   if(is.na(cleanMode)) {
@@ -480,7 +482,7 @@ read_json <- function(url) {
 }
 
 read_streets <- function(inputFile) {
-  # message(">> read_streets (lecture des rues) ", inputFile)
+  # message("read_streets (lecture des rues) ", inputFile)
   extension <- gsub(".*\\.(.*)", "\\1", inputFile)
   
   if(extension %in% c("json", "geojson")) {

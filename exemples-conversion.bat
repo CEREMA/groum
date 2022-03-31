@@ -3,24 +3,30 @@
 call setenv.bat
 rem ouvrir setenv.bat pour configurer le chemin vers R
 
-echo 5/8 - CSV vers HTML
+echo CSV vers HTML
 %R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.html"
 echo.
 
-echo --------------------------------------------------------------------------------------------------------------------------------------
+echo ----
 
-echo 6/8 - CSV vers GPKG
+echo CSV vers GeoJSON
+%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.geojson" --geom=GEOM_WKT
+echo.
+
+echo ----
+
+echo CSV vers GPKG
 %R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.gpkg" --geom=GEOM_WKT
 echo.
 
-echo --------------------------------------------------------------------------------------------------------------------------------------
+echo ----
 
-echo 7/8 - CSV vers JPEG
+echo CSV vers JPEG
 %R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.jpeg" --geom=GEOM_WKT
 
-echo --------------------------------------------------------------------------------------------------------------------------------------
+echo ----
 
-echo 8/8 - CSV vers MD
+echo CSV vers MD
 %R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis.csv" --output="outputs/arrete-cassis.md"
 
 pause

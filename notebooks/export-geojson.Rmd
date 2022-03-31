@@ -1,0 +1,64 @@
+---
+title: "Export des données"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(sf)
+
+source("load-libraries.R", encoding = "UTF-8")
+source("../functions/functions.R", encoding = "UTF-8")
+source("../functions/geocode.R", encoding = "UTF-8")
+source("../functions/markdown.R", encoding = "UTF-8")
+source("../functions/opening-hours.R", encoding = "UTF-8")
+source("../functions/imports/groum-groum/functions.R", encoding = "UTF-8")
+```
+
+Lecture de l'arrêté :
+```{r}
+f <- read_arrete("../data/arrete-cassis-geo4.csv") %>% as_spatial
+
+class(f)
+
+nrow(f)
+
+st_geometry_type(f) %>% table
+```
+
+Export de la donnée
+```{r}
+st_write(f, "../temp/arrete-cassis2.geojson", delete_dsn = TRUE)
+```
+
+```{r}
+get_points <- function(f, field) {
+  
+  f <- f[which(!is.na(f[[field]]) & f[[field]] != ""), ]
+  
+  coords <- f[[field]]
+  coords <- gsub("\\[", "", coords)
+  coords <- gsub("\\]", "", coords)
+  
+  geom <- lapply(coords, function(x) strsplit(x, ",")[[1]] %>% trimws(which = "both") %>% as.numeric %>% st_point) %>% st_sfc
+  print(geom)
+  st_geometry(f) <- geom
+  
+  return(f)
+}
+
+f_debut <- get_points(f, "GEOM_DEBUT")
+f_fin   <- get_points(f, "GEOM_FIN")
+
+f_debut %>% st_coordinates
+f_fin   %>% st_coordinates
+```
+
+Export des données début et fin 
+```{r}
+st_write(f_debut, "../outputs/debuts.gpkg")
+st_write(f_fin, "../outputs/fins.gpkg")
+```
+
+
+
