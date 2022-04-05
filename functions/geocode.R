@@ -29,7 +29,7 @@ as_spatial <- function(df, geom_col = "GEOM_WKT") {
   }
 }
 
-CSV2GPKG <- function(inputCSV, outputSpatial, geomCol = "GEOM_WKT") {
+CSV2SPATIAL <- function(inputCSV, outputSpatial, geomCol = "GEOM_WKT", oneFile = TRUE) {
   
   # Lecture du fichier
   message("Lecture de ", inputCSV)
@@ -40,16 +40,54 @@ CSV2GPKG <- function(inputCSV, outputSpatial, geomCol = "GEOM_WKT") {
       
   # Export
   message("Export vers ", outputSpatial)
-  export_spatial(f, outputSpatial)
+  export_spatial(f, outputSpatial, oneFile)
 }
 
 export_spatial <- function(f, 
                         outputSpatial, 
-                        split_by_geomtype = FALSE) {
+                        oneFile = TRUE,
+                        empty = FALSE) {
   
-  st_write(f %>% st_set_crs(4326), 
-           outputSpatial, 
-           delete_dsn = TRUE)
+  if(oneFile) {
+    st_write(f %>% st_set_crs(4326), 
+             outputSpatial, 
+             delete_dsn = TRUE)
+  } else {
+    f_points   <- f[grep("POINT", st_geometry_type(f)), ]
+    f_lines    <- f[grep("LINE", st_geometry_type(f)), ]
+    f_polygons <- f[grep("POLYGON", st_geometry_type(f)), ]
+    
+    dirName <- dirname(outputSpatial)
+    fileName <- gsub("(.*)\\.(.+)", "\\1", basename(outputSpatial))
+    extension <- gsub("(.*)\\.(.+)", "\\2", basename(outputSpatial))
+    
+    outputPoints <- file.path(dirName, glue("{fileName}-points.{extension}"))
+    outputLines <- file.path(dirName, glue("{fileName}-lines.{extension}"))
+    outputPolygons <- file.path(dirName, glue("{fileName}-polygons.{extension}"))
+    
+    if(nrow(f_lines) > 0) {
+      message("Export des lignes...")
+      st_write(f_lines, outputLines, delete_dsn = TRUE)
+      message("")
+    }
+    
+    if(nrow(f_points) > 0) {
+      message("Export des points...")
+      if(!empty) {
+        message("Retenue des points avec géométrie")
+        f_points <- f_points[!st_is_empty(f_points), ]
+      }
+      st_write(f_points, outputPoints, delete_dsn = TRUE)
+      message("")
+    }
+    
+    if(nrow(f_polygons) > 0) {
+      message("Export des surfaces...")
+      st_write(f_polygons, outputPolygons, delete_dsn = TRUE)
+      message("")
+    }
+  }
+  
   
   # if(length(grep("POLYGON", st_geometry_type(f))) == 0) {
   #   # Si on n'a pas de surfaces, alors on exporte directement les lignes en un seul fichier

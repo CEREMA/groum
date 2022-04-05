@@ -31,6 +31,13 @@ Export de la donnée
 st_write(f, "../temp/arrete-cassis2.geojson", delete_dsn = TRUE)
 ```
 
+Export par type géométrique :
+```{r}
+source("../functions/geocode.R", encoding = "UTF-8")
+export_spatial(f, outputSpatial = "../temp/arrete-cassis.geojson", oneFile = FALSE)
+```
+
+
 ```{r}
 get_points <- function(f, field) {
   
@@ -59,6 +66,3 @@ Export des données début et fin
 st_write(f_debut, "../outputs/debuts.gpkg")
 st_write(f_fin, "../outputs/fins.gpkg")
 ```
-
-
-

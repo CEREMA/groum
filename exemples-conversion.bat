@@ -9,12 +9,6 @@ echo.
 
 echo ----
 
-echo CSV vers GeoJSON
-%R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.geojson" --geom=GEOM_WKT
-echo.
-
-echo ----
-
 echo CSV vers GPKG
 %R_BIN%\Rscript.exe groum.R --input="data/arrete-cassis-geo4.csv" --output="outputs/arrete-cassis.gpkg" --geom=GEOM_WKT
 echo.

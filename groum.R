@@ -41,6 +41,11 @@ parser <- add_option(parser, c("-g", "--geom"),
                      help="Geometry column in the CSV file (for the conversion to GPKG)", 
                      metavar="GeomCol")
 
+parser <- add_option(parser, c("--separated"),
+                     action="store_true", dest="separated", default=FALSE,
+                     help="Outputs one file by geometry type (one for streets, one POIs and one for zones)", 
+                     metavar="separated")
+
 # Arguments ----
 args <- commandArgs(trailing = TRUE)
 
@@ -71,10 +76,13 @@ groum <- function(args) {
              outputHTML = args$output)
 
   } else if(extension %in% c("gpkg", "geojson", "shp")) {
-
-    CSV2GPKG(inputCSV      = args$input,
-             outputSpatial = args$output,
-             geomCol       = args$geomcol)
+    
+    oneFile <- !args$separated
+    
+    CSV2SPATIAL(inputCSV      = args$input,
+                outputSpatial = args$output,
+                geomCol       = args$geomcol,
+                oneFile       = oneFile)
     
   } else if(extension == "jpeg") {
     
