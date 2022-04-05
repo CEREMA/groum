@@ -1,3 +1,6 @@
+# 5 Avril 2022
+- [ ] Utiliser nominatim
+
 # 22 Février 2022
 - [ ] Améliorer les messages
 - [ ] Enlever message Conversion automatique de LHS en liste
